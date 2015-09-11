@@ -1,85 +1,83 @@
 <?php
 /**
- * Stripe Abstract Request
+ * Komoju Abstract Request
  */
 
-namespace Omnipay\Stripe\Message;
+namespace Omnipay\Komoju\Message;
 
 /**
- * Stripe Abstract Request
+ * Komoju Abstract Request
  *
- * This is the parent class for all Stripe requests.
- *
- * Test modes:
- *
- * Stripe accounts have test-mode API keys as well as live-mode
- * API keys. These keys can be active at the same time. Data
- * created with test-mode credentials will never hit the credit
- * card networks and will never cost anyone money.
- *
- * Unlike some gateways, there is no test mode endpoint separate
- * to the live mode endpoint, the Stripe API endpoint is the same
- * for test and for live.
- *
- * Setting the testMode flag on this gateway has no effect.  To
- * use test mode just use your test mode API key.
- *
- * You can use any of the cards listed at https://stripe.com/docs/testing
- * for testing.
- *
- * @see \Omnipay\Stripe\Gateway
- * @link https://stripe.com/docs/api
- * @method \Omnipay\Stripe\Message\Response send()
+ * @see \Omnipay\Komoju\Gateway
+ * @link https://docs.komoju.com
+ * @method \Omnipay\Komoju\Message\Response send()
  */
 abstract class AbstractRequest extends \Omnipay\Common\Message\AbstractRequest
 {
-    /**
-     * Live or Test Endpoint URL
-     *
-     * @var string URL
-     */
-    protected $liveEndpoint = 'https://komoju.com';
-    protected $testEndpoint = 'https://sandbox.komoju.com';
+    protected $liveUrl = 'https://komoju.com';
+    protected $testUrl = 'https://sandbox.komoju.com';
 
-    /**
-     * Get the gateway API Key
-     *
-     * @return string
-     */
     public function getApiKey()
     {
         return $this->getParameter('apiKey');
     }
 
-    /**
-     * Set the gateway API Key
-     *
-     * @return AbstractRequest provides a fluent interface.
-     */
     public function setApiKey($value)
     {
         return $this->setParameter('apiKey', $value);
     }
 
-    public function getMetadata()
+    public function setTax($value)
     {
-        return $this->getParameter('metadata');
+        return $this->setParameter('tax', $value);
     }
 
-    public function setMetadata($value)
+    public function getTax()
     {
-        return $this->setParameter('metadata', $value);
+        return $this->getParameter('tax');
     }
 
-    abstract public function getEndpoint();
+    public function getAccountId()
+    {
+        return $this->getParameter('accountId');
+    }
 
-    /**
-     * Get HTTP Method.
-     *
-     * This is nearly always POST but can be over-ridden in sub classes.
-     *
-     * @return string
-     */
+    public function setAccountId($value)
+    {
+        return $this->setParameter('accountId', $value);
+    }
+
+    public function getPaymentMethod()
+    {
+        return $this->getParameter('paymentMethod');
+    }
+
+    public function setPaymentMethod($value)
+    {
+        return $this->setParameter('paymentMethod', $value);
+    }
+
+    public function getLocale()
+    {
+        return $this->getParameter('locale');
+    }
+
+    public function setLocale($value)
+    {
+        return $this->setParameter('locale', $value);
+    }
+
+    public function getTimestamp()
+    {
+        $timestamp = $this->getParameter('timestamp');
+        return !empty($timestamp) ? $timestamp : time();
+    }
+
+    public function setTimestamp($value)
+    {
+        return $this->setParameter('timestamp', $value);
+    }
+
     public function getHttpMethod()
     {
         return 'POST';
@@ -87,43 +85,19 @@ abstract class AbstractRequest extends \Omnipay\Common\Message\AbstractRequest
 
     public function sendData($data)
     {
-        // don't throw exceptions for 4xx errors
-        $this->httpClient->getEventDispatcher()->addListener(
-            'request.error',
-            function ($event) {
-                if ($event['response']->isClientError()) {
-                    $event->stopPropagation();
-                }
-            }
-        );
-
-        $httpRequest = $this->httpClient->createRequest(
-            $this->getHttpMethod(),
-            $this->getEndpoint(),
-            null,
-            $data
-        );
-        $httpResponse = $httpRequest
-            ->setHeader('Authorization', 'Basic '.base64_encode($this->getApiKey().':'))
-            ->send();
-
-        return $this->response = new Response($this, $httpResponse->json());
+        $endpoint = $this->getEndpoint() . '?' . http_build_query($data, '', '&');
+        $hmac = hash_hmac('sha256', $endpoint, $this->getApiKey());
+        $url = $this->getBaseUrl() . $endpoint . '&hmac=' . $hmac;
+        return $this->response = new PurchaseResponse($this, $data, $url);
     }
 
-    /**
-     * @return mixed
-     */
-    public function getPaymentDetails()
+    protected function getBaseUrl()
     {
-        return $this->getParameter('payment_details');
+        return $this->getTestMode() ? $this->testUrl : $this->liveUrl;
     }
 
-    /**
-     * @param $value
-     * @return AbstractRequest provides a fluent interface.
-     */
-    public function setPaymentDetails($value)
+    protected function getEndpoint()
     {
-        return $this->setParameter('payment_details', $value);
+        return '/' . $this->getLocale() . '/api/' . $this->getAccountId() . '/transactions/' . $this->getPaymentMethod() . '/new';
     }
 }

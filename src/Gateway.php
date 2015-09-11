@@ -25,7 +25,10 @@ class Gateway extends AbstractGateway
     {
         return array(
             'apiKey' => '',
+            'accountId' => '',
+            'paymentMethod' => 'credit_card',
             'testMode' => false,
+            'locale' => 'en'
         );
     }
 
@@ -39,11 +42,52 @@ class Gateway extends AbstractGateway
         return $this->setParameter('apiKey', $value);
     }
 
+    public function getTax()
+    {
+        return $this->getParameter('tax');
+    }
+
+    public function setTax($value)
+    {
+        return $this->setParameter('tax', $value);
+    }
+
+    public function getAccountId()
+    {
+        return $this->getParameter('accountId');
+    }
+
+    public function setAccountId($value)
+    {
+        return $this->setParameter('accountId', $value);
+    }
+
+    public function getPaymentMethod()
+    {
+        return $this->getParameter('paymentMethod');
+    }
+
+    public function setPaymentMethod($value)
+    {
+        return $this->setParameter('paymentMethod', $value);
+    }
+
+    public function getLocale()
+    {
+        return $this->getParameter('locale');
+    }
+
+    public function setLocale($value)
+    {
+        return $this->setParameter('locale', $value);
+    }
+
     public function purchase(array $parameters = array())
     {
         return $this->createRequest('\Omnipay\Komoju\Message\PurchaseRequest', $parameters);
     }
 
+    /*
     public function refund(array $parameters = array())
     {
         return $this->createRequest('\Omnipay\Komoju\Message\RefundRequest', $parameters);
@@ -58,4 +102,5 @@ class Gateway extends AbstractGateway
     {
         return $this->createRequest('\Omnipay\Komoju\Message\FetchTokenRequest', $parameters);
     }
+    */
 }
