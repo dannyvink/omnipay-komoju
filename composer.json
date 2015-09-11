@@ -21,7 +21,6 @@
     "autoload": {
         "psr-4": { "Omnipay\\Komoju\\" : "src/" }
     },
-    "minimum-stability": "dev",
     "require": {
         "omnipay/common": "~2.0"
     },
