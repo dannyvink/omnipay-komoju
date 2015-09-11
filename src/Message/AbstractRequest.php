@@ -186,6 +186,9 @@ abstract class AbstractRequest extends \Omnipay\Common\Message\AbstractRequest
      */
     protected function getEndpoint()
     {
-        return '/' . $this->getLocale() . '/api/' . $this->getAccountId() . '/transactions/' . $this->getPaymentMethod() . '/new';
+        $locale = $this->getLocale();
+        $account = $this->getAccountId();
+        $method = $this->getPaymentMethod();
+        return '/' . $locale . '/api/' . $account . '/transactions/' . $method . '/new';
     }
 }

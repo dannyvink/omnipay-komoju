@@ -85,5 +85,4 @@ class PurchaseResponse extends AbstractResponse implements RedirectResponseInter
     {
         return $this->getData();
     }
-
 }
