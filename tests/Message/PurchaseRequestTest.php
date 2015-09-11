@@ -43,7 +43,7 @@ class PurchaseRequestTest extends TestCase
      */
     private function initializeRequest($timestamp = null)
     {
-        $options = [
+        $options = array(
             'amount'               => '10.00',
             'cancel_url'           => 'http://www.google.com',
             'return_url'           => 'http://www.yahoo.com',
@@ -55,7 +55,7 @@ class PurchaseRequestTest extends TestCase
             'payment_method'       => 'credit_card',
             'locale'               => 'en',
             'testMode'             => true
-        ];
+        );
 
         if ($timestamp) $options['timestamp'] = $timestamp;
 
