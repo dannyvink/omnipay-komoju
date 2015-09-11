@@ -20,6 +20,14 @@ class PurchaseResponse extends AbstractResponse implements RedirectResponseInter
 {
     protected $redirectUrl;
 
+    /**
+     * A Komoju PurchaseResponse requires the request interface and data, as well as
+     * the generated redirection URL.
+     *
+     * @param RequestInterface $request
+     * @param mixed            $data
+     * @param                  $redirectUrl
+     */
     public function __construct(RequestInterface $request, $data, $redirectUrl)
     {
         $this->request = $request;
@@ -27,26 +35,52 @@ class PurchaseResponse extends AbstractResponse implements RedirectResponseInter
         $this->redirectUrl = $redirectUrl;
     }
 
+    /**
+     * With Komoju, the request is not considered successful until after the transaction
+     * has finished taking place on the hosted gateway page.
+     *
+     * @return bool
+     */
     public function isSuccessful()
     {
         return false;
     }
 
+    /**
+     * All Komoju purchase requests take place on the hosted gateway page.
+     *
+     * @return bool
+     */
     public function isRedirect()
     {
         return true;
     }
 
+    /**
+     * Retrieve the generated redirect URL.
+     *
+     * @return mixed
+     */
     public function getRedirectUrl()
     {
         return $this->redirectUrl;
     }
 
+    /**
+     * Retrieve the HTTP method used for redirection.
+     *
+     * @return string
+     */
     public function getRedirectMethod()
     {
         return 'POST';
     }
 
+    /**
+     * Retrieve the data from the response.
+     *
+     * @return mixed
+     */
     public function getRedirectData()
     {
         return $this->getData();

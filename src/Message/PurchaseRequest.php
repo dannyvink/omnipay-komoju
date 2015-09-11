@@ -13,6 +13,12 @@ namespace Omnipay\Komoju\Message;
  */
 class PurchaseRequest extends AbstractRequest
 {
+
+    /**
+     * Assemble the data to send with the request.
+     *
+     * @return array
+     */
     public function getData()
     {
         $this->validate('amount', 'currency');

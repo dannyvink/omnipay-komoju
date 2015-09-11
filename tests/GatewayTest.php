@@ -11,21 +11,26 @@ class GatewayTest extends GatewayTestCase
      */
     protected $gateway;
 
+    /**
+     * Set up the GatewayTest sandbox.
+     */
     public function setUp()
     {
         parent::setUp();
 
         $this->gateway = new Gateway($this->getHttpClient(), $this->getHttpRequest());
-        $this->gateway->setTestMode(true);
-        $this->gateway->setApiKey('mysecretkey');
-        $this->gateway->setAccountId('myaccountid');
-        $this->gateway->setPaymentMethod('credit_card');
     }
 
+    /**
+     * This tests the gateway's ability to generate a proper request.
+     *
+     * @throws \Omnipay\Common\Exception\InvalidRequestException
+     */
     public function testPurchase()
     {
         $timestamp = time();
-        $charge = $this->gateway->purchase([
+
+        $request = $this->gateway->purchase(array(
             'amount' => '10.00',
             'cancel_url' => 'http://www.google.com',
             'return_url' => 'http://www.yahoo.com',
@@ -33,11 +38,15 @@ class GatewayTest extends GatewayTestCase
             'tax' => '0',
             'transactionReference' => '1',
             'timestamp' => $timestamp
-        ])->send();
+        ));
 
-        $this->assertInstanceOf('Omnipay\Komoju\Message\PurchaseResponse', $charge);
-        $this->assertFalse($charge->isSuccessful());
-        $this->assertTrue($charge->isRedirect());
-        $this->assertContains('https://sandbox.komoju.com/en/api/myaccountid/transactions/credit_card/new?timestamp=' . $timestamp . '&transaction%5Bamount%5D=1000&transaction%5Bcancel_url%5D=http%3A%2F%2Fwww.google.com&transaction%5Bcurrency%5D=USD&transaction%5Bexternal_order_num%5D=1&transaction%5Breturn_url%5D=http%3A%2F%2Fwww.yahoo.com&transaction%5Btax%5D=0', $charge->getRedirectUrl());
+        $this->assertInstanceOf('\Omnipay\Komoju\Message\PurchaseRequest', $request);
+        $this->assertSame('10.00', $request->getAmount());
+        $this->assertSame('http://www.google.com', $request->getCancelUrl());
+        $this->assertSame('http://www.yahoo.com', $request->getReturnUrl());
+        $this->assertSame('USD', $request->getCurrency());
+        $this->assertSame('0', $request->getTax());
+        $this->assertSame('1', $request->getTransactionReference());
+        $this->assertSame($timestamp, $request->getTimestamp());
     }
 }
